@@ -1,0 +1,35 @@
+{% import "macros.html" as macros %}
+{% extends "base.html" %}
+{% block content %}
+
+{% for entry in entries %}
+{{ macros.render_entry(entry) }}
+<p>{{ test_html}}</p>
+{% endfor %}
+
+<ul class="pager">
+    {% if has_next %}
+    <li class="previous">
+        <a href="{{ url_for('entries', page=page + 1)}}">&larr; Older</a>
+    </li>
+    {% endif %}
+    <li>
+        <form action="{{ url_for('entries', paginate_value=pageinate_value) }}" method="GET">
+            <select name="paginate_value">
+                <option value="5">5 entries per page</option>
+                <option value="10">10 entries per page</option>
+                <option value="20">20 entries per page</option>
+                <option value="50">50 entries per page</option>
+                <option value="100">100 entries per page</option>
+            </select>
+            <input type="submit" value="Submit">
+        </form>
+    </li>
+    {% if has_prev %}
+    <li class="next">
+        <a href="{{ url_for('entries', page=page -1) }}">&rarr; Newer</a>
+    </li>
+    {% endif %}
+</ul>
+
+{% endblock %}
