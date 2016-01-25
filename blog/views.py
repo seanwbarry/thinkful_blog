@@ -1,7 +1,11 @@
-from flask import render_template, request, redirect, url_for, Markup
+from flask import render_template, request, redirect, url_for, Markup, flash
+
+from flask.ext.login import login_user, login_required
+
+from werkzeug.security import check_password_hash
 
 from blog import app
-from .database import session, Entry
+from .database import session, Entry, User
 
 @app.route("/", methods=["GET", "POST"])
 @app.route("/page/<int:page>", methods=["GET", "POST"])
@@ -28,8 +32,9 @@ def entries(page=1, paginate_value=10):
     print('in the get')
     PAGINATE_BY = 10
     test = request.args.get('paginate_value')
-    test = int(test)
-    PAGINATE_BY=test
+    if test:
+        test = int(test)
+        PAGINATE_BY=test
 
     page_index = page - 1
 
@@ -70,11 +75,13 @@ def entries_2(page):
 
 
 @app.route("/entry/add", methods=["GET"])
+@login_required
 def add_entry_get():
     return render_template("add_edit_entry.html", 
                             page_title="Add Entry")
     
 @app.route("/entry/add", methods=["POST"])
+@login_required
 def add_entry_post():
     entry = Entry(
         title=request.form["title"],
@@ -121,3 +128,19 @@ def edit_entry_post(id):
         return redirect(url_for("entries"))
     else:
         pass
+    
+@app.route("/login", methods=["GET"])
+def login_get():
+    return render_template("login.html")
+    
+@app.route("/login", methods=["POST"])
+def login_post():
+    email = request.form["email"]
+    password = request.form["password"]
+    user = session.query(User).filter_by(email=email).first()
+    if not user or not check_password_hash(user.password, password):
+        flash("Incorrect username or password", "danger")
+        return redirect(url_for("login_get"))
+        
+    login_user(user)
+    return redirect(request.args.get('next') or url_for("entries"))
