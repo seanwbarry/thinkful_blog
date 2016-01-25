@@ -15,8 +15,10 @@
         <textarea class="form-control" id="content" name="content" placeholder="Entry content" rows="20" required>{{ entry_content }}</textarea>
     </div>
     <button type="submit" class="btn btn-default" name="action" value="update">Submit</button>
-    {% if show_delete %}
-    <button type="submit" class="btn btn-default" name="action" value="delete" onclick="return confirm('Are you sure that you want to delete this?');">Delete</button>
-    {% endif %}
 </form>
+{% if show_delete %}
+<form action="{{ url_for('delete_entry_post', id=entry_id) }}" method="POST" style="display:inline-block;">
+        <button type="submit" class="btn btn-default" name="action" value="delete" onclick="return confirm('Are you sure that you want to delete this?');">Delete</button>
+</form>
+{% endif %}
 {% endblock %}

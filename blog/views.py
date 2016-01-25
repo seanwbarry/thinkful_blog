@@ -1,6 +1,6 @@
 from flask import render_template, request, redirect, url_for, Markup, flash
 
-from flask.ext.login import login_user, login_required
+from flask.ext.login import login_user, login_required, current_user, logout_user
 
 from werkzeug.security import check_password_hash
 
@@ -78,14 +78,16 @@ def entries_2(page):
 @login_required
 def add_entry_get():
     return render_template("add_edit_entry.html", 
-                            page_title="Add Entry")
+                            page_title="Add Entry",
+                            show_delete=False)
     
 @app.route("/entry/add", methods=["POST"])
 @login_required
 def add_entry_post():
     entry = Entry(
         title=request.form["title"],
-        content=request.form["content"]
+        content=request.form["content"],
+        author=current_user
     )
     session.add(entry)
     session.commit()
@@ -104,31 +106,47 @@ def view_single_entry(id):
     )
 
 @app.route("/entry/<int:id>/edit", methods=["GET"])
+@login_required
 def edit_entry_get(id):
     entry = session.query(Entry).get(id)
-    entry_title = entry.title
-    entry_content = entry.content
-    return render_template("add_edit_entry.html", 
-                            page_title="Edit Entry",
-                            entry_title=entry_title,
-                            entry_content = entry_content,
-                            show_delete=True)
+    if entry.author==current_user:
+        entry_title = entry.title
+        entry_content = entry.content
+        return render_template("add_edit_entry.html", 
+                                page_title="Edit Entry",
+                                entry_title=entry_title,
+                                entry_content = entry_content,
+                                entry_id = entry.id,
+                                show_delete=True)
+    else:
+        flash("wrong user!","danger")
+        return redirect(url_for("entries"))
     
 @app.route("/entry/<int:id>/edit", methods=["POST"])
+@login_required
 def edit_entry_post(id):
     entry = session.query(Entry).get(id)
-    if request.form['action'] == 'update':
+    if entry.author==current_user:
         entry.title=request.form["title"]
         entry.content=request.form["content"]
         session.commit()
         return redirect(url_for("entries"))
-    elif request.form['action'] == 'delete':
+    else:
+        flash("wrong user!","danger")
+        return redirect(url_for("entries"))
+        
+@app.route("/entry/<int:id>/delete", methods=["POST"])
+@login_required
+def delete_entry_post(id):
+    entry = session.query(Entry).get(id)
+    if entry.author==current_user:
         session.delete(entry)
         session.commit()
         return redirect(url_for("entries"))
     else:
-        pass
-    
+        flash("wrong user!","danger")
+        return redirect(url_for("entries"))
+        
 @app.route("/login", methods=["GET"])
 def login_get():
     return render_template("login.html")
@@ -144,3 +162,8 @@ def login_post():
         
     login_user(user)
     return redirect(request.args.get('next') or url_for("entries"))
+    
+@app.route("/logout")
+def logout():
+    logout_user()
+    return redirect(url_for("entries"))
