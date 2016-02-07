@@ -16,8 +16,8 @@ class PaginateTests(unittest.TestCase):
 		self.client = app.test_client()
 		
 		print('in paginate test222')
-		with self.client.test_request_context():
-			print('in paginate test333')
+		#with self.client.test_request_context():
+		#	print('in paginate test333')
 		#count_returned_entries = print(entries())
 		#	print('in paginate test')
 		#	self.assertEqual(count_returned_entries, 10)
