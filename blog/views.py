@@ -29,7 +29,6 @@ def entries(page=1, paginate_value=10):
     
     PAGINATE_BY = paginate_value
     
-    print('in the get')
     PAGINATE_BY = 10
     test = request.args.get('paginate_value')
     if test:
@@ -37,8 +36,6 @@ def entries(page=1, paginate_value=10):
         PAGINATE_BY=test
 
     page_index = page - 1
-
-    print('being executed')
 
     count = session.query(Entry).count()
 
@@ -161,6 +158,9 @@ def login_post():
         return redirect(url_for("login_get"))
         
     login_user(user)
+    
+    print(url_for("entries"))
+    
     return redirect(request.args.get('next') or url_for("entries"))
     
 @app.route("/logout")
