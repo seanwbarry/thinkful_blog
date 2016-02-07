@@ -20,9 +20,6 @@ class FilterTests(unittest.TestCase):
     def test_date_format_none(self):
         formatted = dateformat(None, "%y/%m/%d")
         self.assertEqual(formatted, None)
-        
-    def next_page_returns_page_increment_1(self):
-        pass
 
 if __name__ == "__main__":
     unittest.main()
